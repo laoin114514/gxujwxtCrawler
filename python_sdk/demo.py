@@ -6,8 +6,11 @@ if __name__ == "__main__":
 
     client = JwxtClient("laoin", "NB666")
 
-    if not client.login():
-        print("登录失败！")
+    try:
+        client.login()
+        print("登录成功！")
+    except Exception as e:
+        print(f"登录失败: {e}")
         sys.exit(1)
 
     print("=== 登录成功 ===\n")
