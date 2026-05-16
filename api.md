@@ -2,7 +2,7 @@
 
 > 教务管理信息服务平台 (正方教务系统 v5 - ZFTAL UI)
 > 基础 URL: `https://jwxt2018.gxu.edu.cn`
-> 总计: 6 个 JSON 数据接口 + 23 个 HTML 页面接口 = **29 个可用端点**
+> 总计: **53 个可用端点** (18 JSON 数据 + 35 HTML 页面)
 
 ---
 
@@ -389,29 +389,57 @@ flag=1&sfyy=1&_search=false&nd={ts}&queryModel.showCount=15&queryModel.currentPa
 
 ## 13. 系统信息
 
+### 预警 / 提示
+
 | 接口 | 方法 | 说明 |
 |------|------|------|
-| `/xtgl/index_cxXttsxx.html` | POST | 系统提示信息 |
 | `/xtgl/index_cxXttsxx.html?bj=2` | POST | 选修课毕业学分提示 |
 | `/xtgl/index_cxKkyjxx.html` | POST | 旷课预警 |
 | `/xtgl/index_cxLyyjxx.html` | POST | 劳育预警 |
 | `/xtgl/index_cxXsxyyjtxIndex.html` | GET | 学业预警列表 |
 | `/xtgl/index_cxXsxyyjtxView.html` | POST | 学业预警详情 |
+| `/xtgl/index_cxXjyjqrzt.html` | POST | 学籍预警确认状态 |
+
+### 未提交计数 (JSON)
+
+| 接口 | 方法 | 返回 |
+|------|------|------|
 | `/xtgl/index_cxJhkcjcsqWtjNum.html` | POST | 教材申请未提交数 |
 | `/xtgl/index_cxXsGxkxfwxm.html` | POST | 公选课学分未修满 |
 | `/xtgl/index_cxXspjWtjNum.html` | POST | 学生评价未提交数 |
-| `/xtgl/index_cxFxjftsNum.html` | POST | 辅修缴费提醒 |
-| `/xtgl/index_cxBsxtsj.html` | POST | 毕设选题时间 |
-| `/xtgl/index_cxXfqrsj.html` | POST | 学分确认时间 |
 | `/xtgl/index_cxThpjWtjNum.html` | POST | 同行评价未提交数 |
 | `/xtgl/index_cxDdpjWtjNum.html` | POST | 督导评价未提交数 |
 | `/xtgl/index_cxLdpjWtjNum.html` | POST | 领导评价未提交数 |
-| `/xtgl/index_cxXxdlztgx.html` | POST | 信息已读状态更新 |
+
+### 时间 / 状态 (JSON)
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/xtgl/index_cxFxjftsNum.html` | POST | 辅修缴费提醒 |
+| `/xtgl/index_cxUpdateFxjftszt.html` | POST | 更新辅修提醒状态 |
+| `/xtgl/index_cxBsxtsj.html` | POST | 毕设选题时间 |
+| `/xtgl/index_cxXfqrsj.html` | POST | 学分确认时间 |
 | `/xtgl/index_cxJssfqy.html` | POST | 角色是否启用 |
 | `/xtgl/index_cxSzmrjs.html` | POST | 设置默认角色 |
+
+### 监考
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
 | `/xtgl/index_cxJsjkxxList.html` | POST | 教师监考列表 |
 | `/xtgl/index_cxJsjkxxView.html` | POST | 监考信息视图 |
-| `/xtgl/index_yhqhAccount.html` | POST | 用户切换 |
+| `/xtgl/index_cxKsjkxxList.html` | POST | 考试监考列表（学生视角） |
+
+### 其他
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/xtgl/index_cxXxdlztgx.html` | POST | 信息已读状态更新 |
+| `/xtgl/index_yhqhAccount.html` | POST | 用户切换（返回原账号） |
+| `/xtgl/index_cxKczywIndex.html` | GET | 可选业务 |
+| `/xtgl/index_cxGnjsView.html` | GET | 功能检索 |
+| `/xtgl/index_cxGlwdyyView.html` | GET | 管理我的应用 |
+| `/xtgl/login_getYzm.html` | GET | 图片验证码 |
 
 ---
 
