@@ -14,6 +14,11 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.backends import default_backend
 
 
+class LoginError(Exception):
+    """登录失败异常"""
+    pass
+
+
 class JwxtClient:
     """教务系统客户端
 
@@ -97,14 +102,14 @@ class JwxtClient:
 
     # ========== 认证 ==========
 
-    def login(self) -> bool:
+    def login(self) -> None:
         """登录教务系统
 
-        Returns:
-            True 登录成功, False 登录失败
+        Raises:
+            LoginError: 登录失败时抛出，包含具体失败原因
         """
         if self._logged_in:
-            return True
+            return
 
         # 1. 获取登录页面和 csrftoken
         resp = self._get(self.LOGIN_PATH)
@@ -129,14 +134,42 @@ class JwxtClient:
             allow_redirects=True,
         )
         resp_url = resp.url.lower()
-        self._logged_in = "login" not in resp_url or "index" in resp_url
+        success = "login" not in resp_url or "index" in resp_url
+
+        if not success:
+            self._raise_login_error(resp)
 
         # 4. 初始化首页会话
-        if self._logged_in:
-            ts = int(time.time() * 1000)
-            self._get(f"{self.INIT_MENU_PATH}?jsdm=xs&_t={ts}&echarts=1")
+        self._logged_in = True
+        ts = int(time.time() * 1000)
+        self._get(f"{self.INIT_MENU_PATH}?jsdm=xs&_t={ts}&echarts=1")
 
-        return self._logged_in
+    def _raise_login_error(self, resp: requests.Response) -> None:
+        """解析登录失败响应并抛出 LoginError"""
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        # 查找常见的错误提示元素
+        for selector, label in [
+            ('#tips', '页面提示'),
+            ('#errorMsg', '错误信息'),
+            ('.error', '错误信息'),
+            ('.alert-danger', '错误信息'),
+            ('.form-msg', '表单消息'),
+        ]:
+            el = soup.select_one(selector)
+            if el and el.get_text(strip=True):
+                raise LoginError(f"{label}: {el.get_text(strip=True)}")
+
+        # 检查是否停留在登录页（通用失败）
+        if "login_slogin" in resp.url.lower():
+            # 尝试从页面标题或表单区域获取提示
+            title = soup.find('title')
+            if title:
+                title_text = title.get_text(strip=True)
+                if "错误" in title_text or "失败" in title_text:
+                    raise LoginError(title_text)
+            raise LoginError("用户名或密码错误，或账号已被锁定")
+
+        raise LoginError(f"登录失败，响应URL: {resp.url}")
 
     def logout(self):
         """退出登录"""
@@ -542,40 +575,3 @@ class JwxtClient:
     def __repr__(self):
         return f"<JwxtClient username={self.username} logged_in={self._logged_in}>"
 
-
-# ========== CLI 使用示例 ==========
-if __name__ == "__main__":
-    import sys
-
-    client = JwxtClient("laoin", "NB666")
-
-    if not client.login():
-        print("登录失败！")
-        sys.exit(1)
-
-    print("=== 登录成功 ===\n")
-
-    # 成绩查询
-    print("--- 2025-2026 第一学期成绩 ---")
-    grades = client.get_grades("2025", "3")
-    for item in grades.get("items", []):
-        print(f"  {item.get('kcmc','')}: {item.get('cj','')} (绩点: {item.get('jd','')}, 学分: {item.get('xf','')})")
-    print(f"  共 {grades.get('totalResult', 0)} 门\n")
-
-    # 考试安排
-    print("--- 考试安排 ---")
-    exams = client.get_exam_arrangement("2025", "12")
-    for item in exams.get("items", []):
-        print(f"  {item.get('kcmc','')}: {item.get('kssj','')} @ {item.get('cdmc','')}")
-
-    # 通知公告
-    print("\n--- 最新通知 ---")
-    notifs = client.get_notifications(size=3)
-    for item in notifs.get("items", []):
-        print(f"  [{item.get('fbsj','')}] {item.get('xwbtqc','')}")
-
-    # 待办事项
-    print("\n--- 待办事项 ---")
-    todos = client.get_todo_list(size=3)
-    for item in todos.get("items", []):
-        print(f"  [{item.get('cjsj','')}] {item.get('xxbtjc','')}")
