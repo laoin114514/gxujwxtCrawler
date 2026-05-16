@@ -1,6 +1,28 @@
-__pycache__
-node_modules
-vendor
-.vsc
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project (含账号密码的本地文件)
 discover*
 test*
+login_page*.html
+after_login*.html
+all_requests.json
+discovered_apis.json
+menu_tree.json
