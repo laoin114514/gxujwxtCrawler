@@ -1,6 +1,6 @@
 """通用模型：分页、学期等"""
 import time
-from typing import Any, Generic, Optional, TypeVar
+from typing import Optional, TypeVar
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -36,13 +36,3 @@ class Semester(BaseModel):
 
 
 T = TypeVar("T")
-
-
-class PaginatedResponse(BaseModel, Generic[T]):
-    """分页响应（泛型）"""
-    current_page: int = Field(default=1, alias="currentPage")
-    total: int = Field(default=0, alias="totalResult")
-    items: list[T] = Field(default_factory=list)
-    raw: dict[str, Any] = Field(default_factory=dict, exclude=True)
-
-    model_config = ConfigDict(populate_by_name=True)

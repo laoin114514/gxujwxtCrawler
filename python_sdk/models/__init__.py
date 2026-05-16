@@ -1,4 +1,4 @@
-from .common import PageQuery, Semester, PaginatedResponse
+from .common import PageQuery, Semester
 from .data import (
     GradeItem,
     GradeQueryResult,

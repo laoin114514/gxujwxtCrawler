@@ -791,8 +791,8 @@ Content-Type: application/x-www-form-urlencoded
 | 6 | `GET /xkgl/common_queryKcxzPaged.html` | 课程性质列表 | `filter_course_natures()` |
 | 7 | `GET /xkgl/common_queryKcgsPaged.html` | 课程归属列表 | `filter_course_groups()` |
 | 8 | `GET /xkgl/common_queryKczPaged.html` | 课程组列表 | `filter_course_clusters()` |
-| 9 | `GET /xtgl/comm_cxJcsjList.html?lxdm=0032` | 教学模式列表 | `filter_teach_modes()` |
-| 10 | `GET /xtgl/comm_cxJcsjList.html?lxdm=0036` | 上课星期列表 | `filter_weekdays()` |
+| 9 | `GET /jwglxt/xtgl/comm_cxJcsjList.html?lxdm=0032` | 教学模式列表 | `filter_teach_modes()` |
+| 10 | `GET /jwglxt/xtgl/comm_cxJcsjList.html?lxdm=0036` | 上课星期列表 | `filter_weekdays()` |
 | 11 | `GET /xkgl/common_querySkjcList.html` | 上课节次列表 | `filter_periods()` |
 | 12 | `GET /xsxxxggl/xsxxwh_cxZyfxPaged.html` | 专业方向列表 | (未独立封装) |
 
@@ -968,13 +968,13 @@ Content-Type: application/x-www-form-urlencoded
 
 | # | 接口 | 说明 | SDK |
 |---|------|------|-----|
-| 10.1 | `POST /xtgl/index_cxAreaOne.html?localeKey=zh_CN&gnmkdm=index` | 本周课表 | `homepage.all()["schedule"]` |
-| 10.2 | `POST /xtgl/index_cxAreaTwo.html?localeKey=zh_CN&gnmkdm=index` | 文件下载 | `homepage.all()["files"]` |
-| 10.3 | `POST /xtgl/index_cxAreaThree.html?localeKey=zh_CN&gnmkdm=index` | 系统消息 | `homepage.all()["messages"]` |
-| 10.4 | `POST /xtgl/index_cxAreaFour.html?localeKey=zh_CN&gnmkdm=index` | 成绩/考试 | `homepage.all()["grades_exams"]` |
-| 10.5 | `POST /xtgl/index_cxAreaFive.html?localeKey=zh_CN&gnmkdm=index` | 校历 | `homepage.all()["calendar"]` |
-| 10.6 | `POST /xtgl/index_cxAreaSix.html?localeKey=zh_CN&gnmkdm=index` | 校历文件 | `homepage.all()["calendar_files"]` |
-| 10.7 | `POST /xtgl/index_cxNews.html?localeKey=zh_CN&gnmkdm=index` | 通知公告 | `homepage.all()["news"]` |
+| 10.1 | `POST /jwglxt/xtgl/index_cxAreaOne.html?localeKey=zh_CN&gnmkdm=index` | 本周课表 | `homepage.all()["schedule"]` |
+| 10.2 | `POST /jwglxt/xtgl/index_cxAreaTwo.html?localeKey=zh_CN&gnmkdm=index` | 文件下载 | `homepage.all()["files"]` |
+| 10.3 | `POST /jwglxt/xtgl/index_cxAreaThree.html?localeKey=zh_CN&gnmkdm=index` | 系统消息 | `homepage.all()["messages"]` |
+| 10.4 | `POST /jwglxt/xtgl/index_cxAreaFour.html?localeKey=zh_CN&gnmkdm=index` | 成绩/考试 | `homepage.all()["grades_exams"]` |
+| 10.5 | `POST /jwglxt/xtgl/index_cxAreaFive.html?localeKey=zh_CN&gnmkdm=index` | 校历 | `homepage.all()["calendar"]` |
+| 10.6 | `POST /jwglxt/xtgl/index_cxAreaSix.html?localeKey=zh_CN&gnmkdm=index` | 校历文件 | `homepage.all()["calendar_files"]` |
+| 10.7 | `POST /jwglxt/xtgl/index_cxNews.html?localeKey=zh_CN&gnmkdm=index` | 通知公告 | `homepage.all()["news"]` |
 
 ### 10.8 用户信息
 
@@ -1059,58 +1059,58 @@ POST /jwglxt/xtgl/index_cxZjsy.html?localeKey=zh_CN&gnmkdm=index&time={ts}
 
 | # | 接口 | 方法 | 说明 | SDK | 返回 |
 |---|------|------|------|-----|------|
-| 13.1.1 | `POST /xtgl/index_cxXttsxx.html?bj=2` | POST | 选修课毕业学分提示 | `tips()` | HTML |
-| 13.1.2 | `POST /xtgl/index_cxKkyjxx.html` | POST | 旷课预警 | `absentee_warning()` | HTML |
-| 13.1.3 | `POST /xtgl/index_cxLyyjxx.html` | POST | 劳育预警 | `labor_warning()` | HTML |
+| 13.1.1 | `POST /jwglxt/xtgl/index_cxXttsxx.html?bj=2` | POST | 选修课毕业学分提示 | `tips()` | HTML |
+| 13.1.2 | `POST /jwglxt/xtgl/index_cxKkyjxx.html` | POST | 旷课预警 | `absentee_warning()` | HTML |
+| 13.1.3 | `POST /jwglxt/xtgl/index_cxLyyjxx.html` | POST | 劳育预警 | `labor_warning()` | HTML |
 
 ### 13.2 学业预警
 
 | # | 接口 | 方法 | 说明 | SDK | 返回 |
 |---|------|------|------|-----|------|
-| 13.2.1 | `GET /xtgl/index_cxXsxyyjtxIndex.html` | GET | 学业预警列表 | `academic_warning_list()` | HTML |
-| 13.2.2 | `POST /xtgl/index_cxXsxyyjtxView.html` | POST | 学业预警详情 | `academic_warning_detail()` | HTML |
-| 13.2.3 | `POST /xtgl/index_cxXjyjqrzt.html` | POST | 学籍预警确认状态 | `academic_warning_confirm_status()` | HTML |
+| 13.2.1 | `GET /jwglxt/xtgl/index_cxXsxyyjtxIndex.html` | GET | 学业预警列表 | `academic_warning_list()` | HTML |
+| 13.2.2 | `POST /jwglxt/xtgl/index_cxXsxyyjtxView.html` | POST | 学业预警详情 | `academic_warning_detail()` | HTML |
+| 13.2.3 | `POST /jwglxt/xtgl/index_cxXjyjqrzt.html` | POST | 学籍预警确认状态 | `academic_warning_confirm_status()` | HTML |
 
 ### 13.3 未提交计数 (JSON)
 
 | # | 接口 | 方法 | 说明 | SDK | 返回类型 |
 |---|------|------|------|-----|---------|
-| 13.3.1 | `POST /xtgl/index_cxJhkcjcsqWtjNum.html` | POST | 教材申请未提交数 | `pending_textbook_apply()` | int |
-| 13.3.2 | `POST /xtgl/index_cxXsGxkxfwxm.html` | POST | 公选课学分未修满 | `elective_credit_deficiency()` | dict `{flag}` |
-| 13.3.3 | `POST /xtgl/index_cxXspjWtjNum.html` | POST | 学生评价未提交数 | `pending_student_evaluation()` | int |
-| 13.3.4 | `POST /xtgl/index_cxThpjWtjNum.html` | POST | 同行评价未提交数 | `pending_peer_evaluation()` | int |
-| 13.3.5 | `POST /xtgl/index_cxDdpjWtjNum.html` | POST | 督导评价未提交数 | `pending_supervisor_evaluation()` | int |
-| 13.3.6 | `POST /xtgl/index_cxLdpjWtjNum.html` | POST | 领导评价未提交数 | `pending_leader_evaluation()` | int |
+| 13.3.1 | `POST /jwglxt/xtgl/index_cxJhkcjcsqWtjNum.html` | POST | 教材申请未提交数 | `pending_textbook_apply()` | int |
+| 13.3.2 | `POST /jwglxt/xtgl/index_cxXsGxkxfwxm.html` | POST | 公选课学分未修满 | `elective_credit_deficiency()` | dict `{flag}` |
+| 13.3.3 | `POST /jwglxt/xtgl/index_cxXspjWtjNum.html` | POST | 学生评价未提交数 | `pending_student_evaluation()` | int |
+| 13.3.4 | `POST /jwglxt/xtgl/index_cxThpjWtjNum.html` | POST | 同行评价未提交数 | `pending_peer_evaluation()` | int |
+| 13.3.5 | `POST /jwglxt/xtgl/index_cxDdpjWtjNum.html` | POST | 督导评价未提交数 | `pending_supervisor_evaluation()` | int |
+| 13.3.6 | `POST /jwglxt/xtgl/index_cxLdpjWtjNum.html` | POST | 领导评价未提交数 | `pending_leader_evaluation()` | int |
 
 ### 13.4 时间与状态 (JSON)
 
 | # | 接口 | 方法 | 说明 | SDK | 返回类型 |
 |---|------|------|------|-----|---------|
-| 13.4.1 | `POST /xtgl/index_cxFxjftsNum.html` | POST | 辅修缴费提醒 | `minor_fee_reminder()` | dict |
-| 13.4.2 | `POST /xtgl/index_cxUpdateFxjftszt.html` | POST | 更新辅修提醒状态 | `minor_fee_reminder_update()` | HTML |
-| 13.4.3 | `POST /xtgl/index_cxBsxtsj.html` | POST | 毕设选题时间 | `thesis_topic_time()` | dict |
-| 13.4.4 | `POST /xtgl/index_cxXfqrsj.html` | POST | 学分确认时间 | `credit_confirm_time()` | dict |
-| 13.4.5 | `POST /xtgl/index_cxJssfqy.html` | POST | 角色是否启用 | `role_enabled()` | dict/int |
-| 13.4.6 | `POST /xtgl/index_cxSzmrjs.html` | POST | 设置默认角色 | `set_default_role()` | dict |
+| 13.4.1 | `POST /jwglxt/xtgl/index_cxFxjftsNum.html` | POST | 辅修缴费提醒 | `minor_fee_reminder()` | dict |
+| 13.4.2 | `POST /jwglxt/xtgl/index_cxUpdateFxjftszt.html` | POST | 更新辅修提醒状态 | `minor_fee_reminder_update()` | HTML |
+| 13.4.3 | `POST /jwglxt/xtgl/index_cxBsxtsj.html` | POST | 毕设选题时间 | `thesis_topic_time()` | dict |
+| 13.4.4 | `POST /jwglxt/xtgl/index_cxXfqrsj.html` | POST | 学分确认时间 | `credit_confirm_time()` | dict |
+| 13.4.5 | `POST /jwglxt/xtgl/index_cxJssfqy.html` | POST | 角色是否启用 | `role_enabled()` | dict/int |
+| 13.4.6 | `POST /jwglxt/xtgl/index_cxSzmrjs.html` | POST | 设置默认角色 | `set_default_role()` | dict |
 
 ### 13.5 监考信息
 
 | # | 接口 | 方法 | 说明 | SDK | 返回 |
 |---|------|------|------|-----|------|
-| 13.5.1 | `POST /xtgl/index_cxJsjkxxList.html` | POST | 教师监考列表 | `exam_monitor_list()` | HTML |
-| 13.5.2 | `POST /xtgl/index_cxJsjkxxView.html` | POST | 监考信息视图 | `exam_monitor_view()` | HTML |
-| 13.5.3 | `POST /xtgl/index_cxKsjkxxList.html` | POST | 考试监考列表 (学生视角) | `exam_monitor_student_list()` | HTML |
+| 13.5.1 | `POST /jwglxt/xtgl/index_cxJsjkxxList.html` | POST | 教师监考列表 | `exam_monitor_list()` | HTML |
+| 13.5.2 | `POST /jwglxt/xtgl/index_cxJsjkxxView.html` | POST | 监考信息视图 | `exam_monitor_view()` | HTML |
+| 13.5.3 | `POST /jwglxt/xtgl/index_cxKsjkxxList.html` | POST | 考试监考列表 (学生视角) | `exam_monitor_student_list()` | HTML |
 
 ### 13.6 其他
 
 | # | 接口 | 方法 | 说明 | SDK | 返回 |
 |---|------|------|------|-----|------|
-| 13.6.1 | `POST /xtgl/index_cxXxdlztgx.html` | POST | 信息已读状态更新 | `mark_read()` | JSON |
-| 13.6.2 | `POST /xtgl/index_yhqhAccount.html` | POST | 用户切换 | `switch_account()` | HTML |
-| 13.6.3 | `GET /xtgl/index_cxKczywIndex.html` | GET | 可选业务 | `available_services()` | HTML |
-| 13.6.4 | `GET /xtgl/index_cxGnjsView.html` | GET | 功能检索 | `feature_search()` | HTML |
-| 13.6.5 | `GET /xtgl/index_cxGlwdyyView.html` | GET | 管理我的应用 | `manage_my_apps()` | HTML |
-| 13.6.6 | `GET /xtgl/login_getYzm.html?time={ts}` | GET | 图片验证码 | `captcha()` | bytes (image) |
+| 13.6.1 | `POST /jwglxt/xtgl/index_cxXxdlztgx.html` | POST | 信息已读状态更新 | `mark_read()` | JSON |
+| 13.6.2 | `POST /jwglxt/xtgl/index_yhqhAccount.html` | POST | 用户切换 | `switch_account()` | HTML |
+| 13.6.3 | `GET /jwglxt/xtgl/index_cxKczywIndex.html` | GET | 可选业务 | `available_services()` | HTML |
+| 13.6.4 | `GET /jwglxt/xtgl/index_cxGnjsView.html` | GET | 功能检索 | `feature_search()` | HTML |
+| 13.6.5 | `GET /jwglxt/xtgl/index_cxGlwdyyView.html` | GET | 管理我的应用 | `manage_my_apps()` | HTML |
+| 13.6.6 | `GET /jwglxt/xtgl/login_getYzm.html?time={ts}` | GET | 图片验证码 | `captcha()` | bytes (image) |
 
 ---
 

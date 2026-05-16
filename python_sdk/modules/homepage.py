@@ -1,7 +1,10 @@
 """首页数据模块"""
 import time
+import logging
 
 from ..base import JwxtBase
+
+_logger = logging.getLogger(__name__)
 
 
 class HomepageModule:
@@ -28,7 +31,8 @@ class HomepageModule:
             try:
                 resp = self._base.post(f"{path}?localeKey=zh_CN&gnmkdm=index")
                 result[name] = resp.text
-            except Exception:
+            except Exception as e:
+                _logger.warning("首页区域 %s 加载失败: %s", name, e)
                 result[name] = None
         return result
 
@@ -42,9 +46,9 @@ class HomepageModule:
         return resp.text
 
     def photo_url(self, student_id: str = "") -> str:
-        """学生照片 URL"""
+        """学生照片完整 URL"""
         sid = student_id or self._base.username
-        return f"/jwglxt/xtgl/photo_cxXszp4.html?xh_id={sid}&zplx=rxqzp"
+        return f"{self._base.BASE_URL}/jwglxt/xtgl/photo_cxXszp4.html?xh_id={sid}&zplx=rxqzp"
 
     def my_apps(self) -> list:
         """我的应用列表"""

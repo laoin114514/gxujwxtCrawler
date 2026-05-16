@@ -43,11 +43,12 @@ class SystemModule:
 
     # ---- 未提交计数 ----
 
-    def _json_number(self, path: str) -> int:
-        """POST 获取 JSON 数字结果"""
+    def _json_number(self, path: str) -> int | dict:
+        """POST 获取 JSON 结果 (数字或对象)"""
         try:
             self._base.ensure_login()
-            return self._base.post(path).json()
+            result = self._base.post(path).json()
+            return result if isinstance(result, (int, dict)) else int(result)
         except Exception:
             return 0
 

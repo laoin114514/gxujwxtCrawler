@@ -7,7 +7,7 @@ from typing import Optional
 
 from ..base import JwxtBase
 from ..models.common import PageQuery
-from ..models.data import CourseItem, CourseClassDetail
+from ..models.data import CourseItem, CourseClassDetail, CourseQueryResult, CourseClassResult
 
 
 class CourseModule:
@@ -26,7 +26,7 @@ class CourseModule:
     def display(self,
                 xkkz_id: str, kklxdm: str,
                 njdm_id: str = "", zyh_id: str = "",
-                xszxzt: str = "", kspage: int = 0, jspage: int = 0) -> list[CourseItem]:
+                xszxzt: str = "", kspage: int = 0, jspage: int = 0) -> CourseQueryResult:
         """查询选课课程列表（主查询，对应页签切换）
 
         Args:
@@ -46,12 +46,13 @@ class CourseModule:
         }
         resp = self._base.post(f"{self._BASE}_cxZzxkYzbDisplay.html", data=data)
         raw = resp.json()
-        return [CourseItem(**item) for item in raw.get("tmpList", [])]
+        items = [CourseItem(**item) for item in raw.get("tmpList", [])]
+        return CourseQueryResult(items=items)
 
     def search(self, xkkz_id: str, kklxdm: str,
                xkxnm: str, xkxqm: str,
                njdm_id: str = "", zyh_id: str = "",
-               kspage: int = 0, jspage: int = 20, **filters) -> list[CourseItem]:
+               kspage: int = 0, jspage: int = 20, **filters) -> CourseQueryResult:
         """分页搜索课程（高级查询，searchBox 触发）
 
         Args:
@@ -109,7 +110,8 @@ class CourseModule:
         }
         resp = self._base.post(f"{self._BASE}_cxZzxkYzbPartDisplay.html", data=data)
         raw = resp.json()
-        return [CourseItem(**item) for item in raw.get("tmpList", [])]
+        items = [CourseItem(**item) for item in raw.get("tmpList", [])]
+        return CourseQueryResult(items=items)
 
     def selected(self) -> list[dict]:
         """已选课程列表"""
@@ -118,7 +120,7 @@ class CourseModule:
         return resp.json() if isinstance(resp.json(), list) else []
 
     def class_detail(self, kch_id: str, jxb_id: str, xkkz_id: str, kklxdm: str,
-                     xkxnm: str, xkxqm: str, **fields) -> list[CourseClassDetail]:
+                     xkxnm: str, xkxqm: str, **fields) -> CourseClassResult:
         """教学班详情（点击课程展开）
 
         Args:
@@ -178,7 +180,8 @@ class CourseModule:
             f"/jwglxt/xsxk/zzxkyzbjk_cxJxbWithKchZzxkYzb.html", data=data
         )
         raw = resp.json()
-        return [CourseClassDetail(**item) for item in raw] if isinstance(raw, list) else []
+        items = [CourseClassDetail(**item) for item in raw] if isinstance(raw, list) else []
+        return CourseClassResult(items=items)
 
     # ================================================================
     # 选课操作
