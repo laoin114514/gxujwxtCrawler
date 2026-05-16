@@ -84,6 +84,61 @@ class TodoQueryResult(_AliasedModel):
     total: int = Field(default=0, alias="totalResult")
 
 
+# ========== 选课 ==========
+
+class CourseItem(_AliasedModel):
+    """可选课程条目"""
+    course_code: str = Field(default="", alias="kch", description="课程号")
+    course_name: str = Field(default="", alias="kcmc", description="课程名称")
+    credit: str = Field(default="", alias="xf", description="学分")
+    is_retake: str = Field(default="", alias="cxbj", description="是否重修 (0/1)")
+    is_minor: str = Field(default="", alias="fxbj", description="是否辅修 (0/1)")
+    is_limited: str = Field(default="", alias="xxkbj", description="是否限制选课")
+    is_recommended: str = Field(default="", alias="sftj", description="是否推荐课程")
+    class_type: str = Field(default="", alias="kclxmc", description="课程类型名称")
+    group_name: str = Field(default="", alias="kzmc", description="课程组名称")
+    class_id: str = Field(default="", alias="jxb_id", description="教学班ID")
+    class_name: str = Field(default="", alias="jxbmc", description="教学班名称")
+    capacity: str = Field(default="", alias="jxbzrl", description="教学班容量")
+    selected_count: str = Field(default="", alias="yxzrs", description="已选人数")
+    kc_row: str = Field(default="", alias="kcrow", description="课程行号")
+
+
+class CourseClassDetail(_AliasedModel):
+    """教学班详情"""
+    class_id: str = Field(default="", alias="jxb_id", description="教学班ID")
+    is_minor: str = Field(default="", alias="fxbj", description="辅修标记")
+    is_required: str = Field(default="", alias="bxbj", description="必修标记")
+    selected_count: str = Field(default="", alias="yxzrs", description="已选人数")
+    capacity: str = Field(default="", alias="jxbrl", description="容量")
+    schedule: str = Field(default="", alias="sksj", description="上课时间")
+    classroom: str = Field(default="", alias="ktmc", description="课堂名称")
+    location: str = Field(default="", alias="jxdd", description="教学地点")
+    teach_mode: str = Field(default="", alias="jxms", description="教学模式")
+    credit: str = Field(default="", alias="xf", description="学分")
+    teach_method: str = Field(default="", alias="skfsmc", description="授课方式")
+    exam_time: str = Field(default="", alias="kssj", description="考试时间")
+    course_category: str = Field(default="", alias="kclbmc", description="课程类别")
+    course_nature: str = Field(default="", alias="kcxzmc", description="课程性质")
+    campus_name: str = Field(default="", alias="xqumc", description="校区名称")
+    area_name: str = Field(default="", alias="yqmc", description="园区名称")
+    college_name: str = Field(default="", alias="kkxymc", description="开课学院")
+    teacher_info: str = Field(default="", alias="jsxx", description="教师信息")
+    remark: str = Field(default="", alias="xkbz", description="选课备注")
+    textbook_flag: str = Field(default="", alias="sfydjc", description="是否预定教材")
+    pending_capacity: str = Field(default="", alias="dsfrl", description="待释放容量")
+
+
+class CourseQueryResult(_AliasedModel):
+    """选课查询结果"""
+    items: list[CourseItem] = Field(default_factory=list, alias="tmpList")
+
+
+class CourseClassResult(_AliasedModel):
+    """教学班详情列表"""
+    items: list[CourseClassDetail] = Field(default_factory=list)
+
+
 # ========== 用户信息 ==========
 
 class UserInfo(_AliasedModel):

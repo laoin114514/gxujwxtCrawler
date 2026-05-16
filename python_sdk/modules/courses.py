@@ -1,15 +1,17 @@
-"""选课管理模块"""
+"""选课管理模块
+
+所有接口从 zzxkYzb.js 逆向提取，含完整参数格式。
+选课操作受时间窗口限制，非选课期仅返回空列表或页面框架。
+"""
 from typing import Optional
 
 from ..base import JwxtBase
 from ..models.common import PageQuery
+from ..models.data import CourseItem, CourseClassDetail
 
 
 class CourseModule:
-    """选课管理
-
-    注意: 选课数据查询受选课时间窗口限制，非选课期仅能获取页面框架。
-    """
+    """选课管理"""
 
     _GNMKDM = "N253512"
     _BASE = "/jwglxt/xsxk/zzxkyzb"
@@ -17,96 +19,358 @@ class CourseModule:
     def __init__(self, base: JwxtBase):
         self._base = base
 
-    # ---- 页面 ----
+    # ================================================================
+    # 数据查询接口 (JSON)
+    # ================================================================
+
+    def display(self,
+                xkkz_id: str, kklxdm: str,
+                njdm_id: str = "", zyh_id: str = "",
+                xszxzt: str = "", kspage: int = 0, jspage: int = 0) -> list[CourseItem]:
+        """查询选课课程列表（主查询，对应页签切换）
+
+        Args:
+            xkkz_id: 选课控制ID
+            kklxdm: 选课类型代码
+            njdm_id: 年级代码
+            zyh_id: 专业代码
+            xszxzt: 学生在线状态
+            kspage: 起始页
+            jspage: 结束页
+        """
+        self._base.ensure_login()
+        data = {
+            "xkkz_id": xkkz_id, "kklxdm": kklxdm,
+            "xszxzt": xszxzt, "njdm_id": njdm_id, "zyh_id": zyh_id,
+            "kspage": kspage, "jspage": jspage,
+        }
+        resp = self._base.post(f"{self._BASE}_cxZzxkYzbDisplay.html", data=data)
+        raw = resp.json()
+        return [CourseItem(**item) for item in raw.get("tmpList", [])]
+
+    def search(self, xkkz_id: str, kklxdm: str,
+               xkxnm: str, xkxqm: str,
+               njdm_id: str = "", zyh_id: str = "",
+               kspage: int = 0, jspage: int = 20, **filters) -> list[CourseItem]:
+        """分页搜索课程（高级查询，searchBox 触发）
+
+        Args:
+            xkkz_id: 选课控制ID
+            kklxdm: 选课类型代码
+            xkxnm: 选课学年
+            xkxqm: 选课学期
+            njdm_id: 年级代码
+            zyh_id: 专业代码
+            kspage: 起始页码
+            jspage: 结束页码
+            **filters: 筛选条件 (key 对应页面上的 hidden input id)
+        """
+        self._base.ensure_login()
+        data = {
+            "xkkz_id": xkkz_id, "kklxdm": kklxdm,
+            "xkxnm": xkxnm, "xkxqm": xkxqm,
+            "njdm_id": njdm_id, "zyh_id": zyh_id,
+            "kspage": kspage + 1, "jspage": jspage,
+            "xklc": filters.get("xklc", ""),
+            "xkly": filters.get("xkly", ""),
+            "bklx_id": filters.get("bklx_id", ""),
+            "sfkkjyxdxnxq": filters.get("sfkkjyxdxnxq", ""),
+            "xqh_id": filters.get("xqh_id", ""),
+            "jg_id": filters.get("jg_id", ""),
+            "zyfx_id": filters.get("zyfx_id", ""),
+            "bh_id": filters.get("bh_id", ""),
+            "xbm": filters.get("xbm", ""),
+            "xslbdm": filters.get("xslbdm", ""),
+            "mzm": filters.get("mzm", ""),
+            "xz": filters.get("xz", ""),
+            "ccdm": filters.get("ccdm", ""),
+            "xsbj": filters.get("xsbj", ""),
+            "sfkknj": filters.get("sfkknj", ""),
+            "sfkkzy": filters.get("sfkkzy", ""),
+            "kzybkxy": filters.get("kzybkxy", ""),
+            "sfznkx": filters.get("sfznkx", ""),
+            "zdkxms": filters.get("zdkxms", ""),
+            "sfkxq": filters.get("sfkxq", ""),
+            "bhbcyxkjxb": filters.get("bhbcyxkjxb", ""),
+            "sfkcfx": filters.get("sfkcfx", ""),
+            "kkbk": filters.get("kkbk", ""),
+            "kkbkdj": filters.get("kkbkdj", ""),
+            "bklbkcj": filters.get("bklbkcj", ""),
+            "sfkgbcx": filters.get("sfkgbcx", ""),
+            "sfrxtgkcxd": filters.get("sfrxtgkcxd", ""),
+            "tykczgxdcs": filters.get("tykczgxdcs", ""),
+            "gnjkxdnj": filters.get("gnjkxdnj", ""),
+            "bjgkczxbbjwcx": filters.get("bjgkczxbbjwcx", ""),
+            "bbhzxjxb": filters.get("bbhzxjxb", ""),
+            "kzkcgs": filters.get("kzkcgs", ""),
+            "rwlx": filters.get("rwlx", ""),
+            "rlkz": filters.get("rlkz", ""),
+            "xkzgbj": filters.get("xkzgbj", ""),
+        }
+        resp = self._base.post(f"{self._BASE}_cxZzxkYzbPartDisplay.html", data=data)
+        raw = resp.json()
+        return [CourseItem(**item) for item in raw.get("tmpList", [])]
+
+    def selected(self) -> list[dict]:
+        """已选课程列表"""
+        self._base.ensure_login()
+        resp = self._base.post(f"{self._BASE}_cxZzxkYzbChoosed.html", data={})
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def class_detail(self, kch_id: str, jxb_id: str, xkkz_id: str, kklxdm: str,
+                     xkxnm: str, xkxqm: str, **fields) -> list[CourseClassDetail]:
+        """教学班详情（点击课程展开）
+
+        Args:
+            kch_id: 课程ID
+            jxb_id: 教学班ID (可选，用于定位具体教学班)
+            xkkz_id: 选课控制ID
+            kklxdm: 选课类型代码
+            xkxnm: 学年
+            xkxqm: 学期
+        """
+        self._base.ensure_login()
+        data = {
+            "kch_id": kch_id, "jxb_id": jxb_id,
+            "xkkz_id": xkkz_id, "kklxdm": kklxdm,
+            "xkxnm": xkxnm, "xkxqm": xkxqm,
+            "rwlx": fields.get("rwlx", ""),
+            "xkly": fields.get("xkly", ""),
+            "bklx_id": fields.get("bklx_id", ""),
+            "sfkkjyxdxnxq": fields.get("sfkkjyxdxnxq", ""),
+            "kzkcgs": fields.get("kzkcgs", ""),
+            "xqh_id": fields.get("xqh_id", ""),
+            "jg_id": fields.get("jg_id", ""),
+            "zyfx_id": fields.get("zyfx_id", ""),
+            "njdm_id": fields.get("njdm_id", ""),
+            "zyh_id": fields.get("zyh_id", ""),
+            "bh_id": fields.get("bh_id", ""),
+            "xbm": fields.get("xbm", ""),
+            "xslbdm": fields.get("xslbdm", ""),
+            "mzm": fields.get("mzm", ""),
+            "xz": fields.get("xz", ""),
+            "ccdm": fields.get("ccdm", ""),
+            "xsbj": fields.get("xsbj", ""),
+            "sfkknj": fields.get("sfkknj", ""),
+            "sfkkzy": fields.get("sfkkzy", ""),
+            "kzybkxy": fields.get("kzybkxy", ""),
+            "sfznkx": fields.get("sfznkx", ""),
+            "zdkxms": fields.get("zdkxms", ""),
+            "sfkxq": fields.get("sfkxq", ""),
+            "bhbcyxkjxb": fields.get("bhbcyxkjxb", ""),
+            "sfkcfx": fields.get("sfkcfx", ""),
+            "bbhzxjxb": fields.get("bbhzxjxb", ""),
+            "kkbk": fields.get("kkbk", ""),
+            "kkbkdj": fields.get("kkbkdj", ""),
+            "bklbkcj": fields.get("bklbkcj", ""),
+            "rlkz": fields.get("rlkz", ""),
+            "gnjkxdnj": fields.get("gnjkxdnj", ""),
+            "txbsfrl": fields.get("txbsfrl", ""),
+            "cdrlkz": fields.get("cdrlkz", ""),
+            "rlzlkz": fields.get("rlzlkz", ""),
+            "xklc": fields.get("xklc", ""),
+            "cxbj": fields.get("cxbj", ""),
+            "fxbj": fields.get("fxbj", ""),
+            "xkxskcgskg": fields.get("xkxskcgskg", ""),
+            "jxbzcxskg": fields.get("jxbzcxskg", ""),
+        }
+        resp = self._base.post(
+            f"/jwglxt/xsxk/zzxkyzbjk_cxJxbWithKchZzxkYzb.html", data=data
+        )
+        raw = resp.json()
+        return [CourseClassDetail(**item) for item in raw] if isinstance(raw, list) else []
+
+    # ================================================================
+    # 选课操作
+    # ================================================================
+
+    def quick_select(self, xkkz_id: str) -> dict:
+        """一键选课"""
+        self._base.ensure_login()
+        resp = self._base.post(
+            f"{self._BASE}_xkZzxkyzbQuickly.html",
+            data={"xkkz_id": xkkz_id},
+        )
+        return resp.json()
+
+    def check_credit(self, xnm: str, xqm: str, njdm_id: str,
+                     zyh_id: str, kklxdm: str) -> dict:
+        """学分检查"""
+        self._base.ensure_login()
+        resp = self._base.post(
+            f"{self._BASE}_cxCheckZzxkyzbXfmcBynjzy.html",
+            data={"xnm": xnm, "xqm": xqm, "njdm_id": njdm_id,
+                  "zyh_id": zyh_id, "kklxdm": kklxdm},
+        )
+        return {"result": resp.text}
+
+    def credit_validation(self, kklxdm: str) -> dict:
+        """学年学分验证"""
+        self._base.ensure_login()
+        resp = self._base.post(
+            f"{self._BASE}_cxZzxkyzbLnyhxf.html",
+            data={"kklxdm": kklxdm},
+        )
+        return {"credit": resp.text}
+
+    # ================================================================
+    # 信息查看 (页面)
+    # ================================================================
+
+    def credit_requirement(self, kklxdm: str) -> str:
+        """学分要求查看"""
+        self._base.ensure_login()
+        resp = self._base.post(
+            f"{self._BASE}_cxYinxyixxfView.html",
+            data={"kklxdm": kklxdm},
+        )
+        return resp.text
+
+    def course_rules(self, xkkz_id: str, kklxdm: str) -> str:
+        """选课规则"""
+        self._base.ensure_login()
+        resp = self._base.post(
+            "/jwglxt/xkgzsz/jbxkgzsz_cxJbxkgzsz.html",
+            data={"xkkz_id": xkkz_id, "kklxdm": kklxdm},
+        )
+        return resp.text
+
+    def teacher_info(self, jgh_id: str, kch_id: str) -> str:
+        """教师简介弹窗"""
+        self._base.ensure_login()
+        resp = self._base.get(
+            f"/jwglxt/xkgl/common_cxJsxxModel.html?jgh_id={jgh_id}&kch_id={kch_id}"
+        )
+        return resp.text
+
+    def course_info(self, kch_id: str) -> str:
+        """课程简介弹窗"""
+        self._base.ensure_login()
+        resp = self._base.get(
+            f"/jwglxt/xkgl/common_cxKcxxModel.html?kch_id={kch_id}"
+        )
+        return resp.text
+
+    def class_enrollment_detail(self, kch_id: str, jxb_id: str,
+                                xnm: str, xqm: str) -> str:
+        """教学班人数明细"""
+        self._base.ensure_login()
+        resp = self._base.get(
+            f"/jwglxt/xkgl/common_cxJxbrsmxIndex.html"
+            f"?kch_id={kch_id}&jxb_id={jxb_id}&xnm={xnm}&xqm={xqm}"
+        )
+        return resp.text
+
+    def textbook_info(self, jxb_id: str) -> str:
+        """教材信息弹窗"""
+        self._base.ensure_login()
+        resp = self._base.get(
+            f"/jwglxt/xsxk/tjxkyzb_cxJcxxList.html?jxb_id={jxb_id}"
+        )
+        return resp.text
+
+    def course_remark(self, jxb_id: str) -> str:
+        """选课备注"""
+        self._base.ensure_login()
+        resp = self._base.get(
+            f"/jwglxt/xsxk/tjxkyzb_cxXkbzMsg.html?jxb_id={jxb_id}"
+        )
+        return resp.text
+
+    def schedule_preview(self, xnm: str, xqm: str) -> str:
+        """课表预览（选课页内弹窗）"""
+        self._base.ensure_login()
+        resp = self._base.get(
+            f"/jwglxt/kbcx/xskbcx_cxXskbPopupIndex.html?xnm={xnm}&xqm={xqm}"
+        )
+        return resp.text
+
+    # ================================================================
+    # 下拉条件查询 (供高级搜索使用)
+    # ================================================================
+
+    def filter_colleges(self, locale_key: str = "zh_CN") -> list[dict]:
+        """开课学院列表"""
+        self._base.ensure_login()
+        resp = self._base.get(
+            f"/jwglxt/xkgl/common_queryKkbmPaged.html?localeKey={locale_key}"
+        )
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_grades(self, njdm_id: str = "") -> list[dict]:
+        """年级列表"""
+        self._base.ensure_login()
+        resp = self._base.get(
+            f"/jwglxt/xkgl/common_queryNjPaged.html?njdm_id={njdm_id}"
+        )
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_majors(self, locale_key: str = "zh_CN", jg_id: str = "",
+                      zyh_id: str = "") -> list[dict]:
+        """专业列表"""
+        self._base.ensure_login()
+        resp = self._base.get(
+            f"/jwglxt/xkgl/common_queryZyPaged.html"
+            f"?localeKey={locale_key}&jg_id={jg_id}&zyh_id={zyh_id}"
+        )
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_campus(self) -> list[dict]:
+        """校区列表"""
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/xkgl/common_queryXquListPaged.html")
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_course_types(self) -> list[dict]:
+        """课程类别列表"""
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/xkgl/common_queryKclbListPaged.html")
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_course_natures(self) -> list[dict]:
+        """课程性质列表"""
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/xkgl/common_queryKcxzPaged.html")
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_course_groups(self) -> list[dict]:
+        """课程归属列表"""
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/xkgl/common_queryKcgsPaged.html")
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_course_clusters(self) -> list[dict]:
+        """课程组列表"""
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/xkgl/common_queryKczPaged.html")
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_teach_modes(self) -> list[dict]:
+        """教学模式"""
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/xtgl/comm_cxJcsjList.html?lxdm=0032")
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_weekdays(self) -> list[dict]:
+        """上课星期"""
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/xtgl/comm_cxJcsjList.html?lxdm=0036")
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    def filter_periods(self) -> list[dict]:
+        """上课节次"""
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/xkgl/common_querySkjcList.html")
+        return resp.json() if isinstance(resp.json(), list) else []
+
+    # ================================================================
+    # 页面加载 (HTML)
+    # ================================================================
 
     def index_page(self) -> str:
-        """选课首页（含可选课程列表框架）"""
+        """选课首页"""
         self._base.ensure_login()
         resp = self._base.get(
             f"{self._BASE}_cxZzxkYzbIndex.html?gnmkdm={self._GNMKDM}&layout=default"
-        )
-        return resp.text
-
-    # ---- 可选课程 ----
-
-    def available_list(self, year: str, term: str, keyword: str = "",
-                       query: Optional[PageQuery] = None) -> str:
-        """可选课程列表（需在选课期间，返回 HTML 含课程数据）"""
-        self._base.ensure_login()
-        q = query or PageQuery()
-        data = q.to_form_data(xnm=year, xqm=term, kcmc=keyword)
-        resp = self._base.post(
-            f"{self._BASE}_cxZzxkYzbIndex.html?doType=query&gnmkdm={self._GNMKDM}",
-            data=data,
-        )
-        return resp.text
-
-    # ---- 已选课程 ----
-
-    def selected_page(self) -> str:
-        """已选课程页面"""
-        self._base.ensure_login()
-        q = PageQuery()
-        data = q.to_form_data()
-        resp = self._base.post(
-            f"{self._BASE}_cxZzxkYzb.html?gnmkdm={self._GNMKDM}",
-            data=data,
-        )
-        return resp.text
-
-    # ---- 其他选课类型 ----
-
-    def public_elective(self, year: str, term: str) -> str:
-        """公选课列表"""
-        self._base.ensure_login()
-        q = PageQuery()
-        data = q.to_form_data(xnm=year, xqm=term)
-        resp = self._base.post(
-            f"{self._BASE}_cxGxkjxqkIndex.html?doType=query&gnmkdm={self._GNMKDM}",
-            data=data,
-        )
-        return resp.text
-
-    def all_school_elective(self, year: str, term: str) -> str:
-        """全校选修课"""
-        self._base.ensure_login()
-        q = PageQuery()
-        data = q.to_form_data(xnm=year, xqm=term)
-        resp = self._base.post(
-            f"{self._BASE}_cxQxkcxkIndex.html?doType=query&gnmkdm={self._GNMKDM}",
-            data=data,
-        )
-        return resp.text
-
-    def pe_elective(self, year: str, term: str) -> str:
-        """体育选课"""
-        self._base.ensure_login()
-        q = PageQuery()
-        data = q.to_form_data(xnm=year, xqm=term)
-        resp = self._base.post(
-            f"{self._BASE}_cxTykcxxkIndex.html?doType=query&gnmkdm={self._GNMKDM}",
-            data=data,
-        )
-        return resp.text
-
-    def retake_courses(self, year: str, term: str) -> str:
-        """重修选课"""
-        self._base.ensure_login()
-        q = PageQuery()
-        data = q.to_form_data(xnm=year, xqm=term)
-        resp = self._base.post(
-            f"{self._BASE}_cxCxkccxIndex.html?doType=query&gnmkdm={self._GNMKDM}",
-            data=data,
-        )
-        return resp.text
-
-    def result_query(self) -> str:
-        """选课结果查询"""
-        self._base.ensure_login()
-        q = PageQuery()
-        data = q.to_form_data()
-        resp = self._base.post(
-            f"{self._BASE}_cxXskccjcx.html?gnmkdm={self._GNMKDM}",
-            data=data,
         )
         return resp.text

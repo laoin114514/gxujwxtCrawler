@@ -8,4 +8,8 @@ from .data import (
     NotificationQueryResult,
     TodoItem,
     TodoQueryResult,
+    CourseItem,
+    CourseClassDetail,
+    CourseQueryResult,
+    CourseClassResult,
 )
