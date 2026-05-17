@@ -178,10 +178,10 @@ class SystemModule:
         """浏览器检测"""
         return self._base.get("/jwglxt/xtgl/init_cxBrowser.html").text
 
-    def change_language(self) -> dict:
+    def change_language(self) -> str:
         """切换语言"""
         self._base.ensure_login()
-        return self._base.post("/jwglxt/xtgl/init_changeLocal.html").json()
+        return self._base.post("/jwglxt/xtgl/init_changeLocal.html").text
 
     def change_password_page(self) -> str:
         """修改密码页面"""
