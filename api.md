@@ -4,9 +4,29 @@
 >
 > 基础 URL: `https://jwxt2018.gxu.edu.cn`
 >
-> 总计: **85 个端点** (37 JSON 数据 + 48 HTML 页面)
+> 总计: **100+ 个端点** (38 JSON 数据 + 62 HTML 页面/其他)
 >
-> SDK: `python_sdk` 最后更新: 2026-05-16
+> SDK: `python_sdk` 最后更新: 2026-05-17
+
+---
+
+## 目录
+
+1. [认证流程 (5)](#1-认证流程)
+2. [通用说明](#2-通用说明)
+3. [成绩查询 (5)](#3-成绩查询)
+4. [课表查询 (11)](#4-课表查询)
+5. [考试安排 (3)](#5-考试安排)
+6. [选课管理 (27)](#6-选课管理)
+7. [学业与预警 (2)](#7-学业与预警)
+8. [通知公告 (3)](#8-通知公告)
+9. [待办事项 (1)](#9-待办事项)
+10. [首页数据 (7 区域 + 4)](#10-首页数据)
+11. [学生评价 (3)](#11-学生评价)
+12. [教材管理 (3)](#12-教材管理)
+13. [系统信息 (42)](#13-系统信息)
+14. [端点汇总](#14-端点汇总)
+15. [SDK 使用示例](#15-sdk-使用示例)
 
 ---
 
@@ -192,7 +212,7 @@ Referer: https://jwxt2018.gxu.edu.cn/jwglxt/xtgl/index_initMenu.html
 
 ## 3. 成绩查询
 
-> SDK: `client.grades`
+> SDK: `client.grades` — 5 个端点 (1 JSON + 4 HTML)
 
 ### 3.1 查询学期成绩
 
@@ -282,11 +302,22 @@ GET /jwglxt/cjcx/cjcx_cxDgXscj.html?doType=statistics&gnmkdm=N305005&time={ts}
 
 > **SDK**: `client.grades.statistics()` → HTML string
 
+### 3.4 成绩导出
+
+```
+POST /jwglxt/cjcx/cjcx_dcListByXs.html?gnmkdm=N305005
+Content-Type: application/x-www-form-urlencoded
+```
+
+**响应**: 导出文件 (HTML/Excel)。
+
+> **SDK**: `client.grades.export()` → HTML string
+
 ---
 
 ## 4. 课表查询
 
-> SDK: `client.schedule`
+> SDK: `client.schedule` — 11 个端点 (2 JSON + 9 HTML)
 
 ### 4.1 课表首页
 
@@ -392,11 +423,64 @@ GET /jwglxt/kbcx/xskbqr_cxXskbqrIndex.html?gnmkdm=N2158&time={ts}
 
 > **SDK**: `client.schedule.credit_confirm()` → HTML string
 
+### 4.7 课表导出 — 表格
+
+```
+POST /jwglxt/kbcx/xskbcx_cxDcExcelXskb.html?doType=table&gnmkdm=N2151
+Content-Type: application/x-www-form-urlencoded
+```
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `xnm` | string | 否 | 学年 |
+| `xqm` | string | 否 | 学期 |
+
+**响应**: 导出文件 (HTML/Excel)。
+
+> **SDK**: `client.schedule.export_table(xnm, xqm)` → HTML string
+
+### 4.8 课表导出 — 列表
+
+```
+POST /jwglxt/kbcx/xskbcx_cxDcExcelXskblb.html?doType=list&gnmkdm=N2151
+Content-Type: application/x-www-form-urlencoded
+```
+
+参数同 4.7。
+
+> **SDK**: `client.schedule.export_list(xnm, xqm)` → HTML string
+
+### 4.9 课表简洁版
+
+```
+GET /jwglxt/kbcx/xskbcx_cxXskbSimpleIndex.html?gnmkdm=N2151
+```
+
+> **SDK**: `client.schedule.simple_view()` → HTML string
+
+### 4.10 课表确认详情查询
+
+```
+POST /jwglxt/kbcx/xskbqr_cxXskbqrIndex.html?doType=query&gnmkdm=N2158
+Content-Type: application/x-www-form-urlencoded
+```
+
+> **SDK**: `client.schedule.credit_confirm_detail()` → HTML string
+
+### 4.11 课表确认提交
+
+```
+POST /jwglxt/kbcx/xskbqr_qrXskbqr.html?gnmkdm=N2158
+Content-Type: application/x-www-form-urlencoded
+```
+
+> **SDK**: `client.schedule.credit_confirm_submit()` → HTML string
+
 ---
 
 ## 5. 考试安排
 
-> SDK: `client.exams`
+> SDK: `client.exams` — 3 个端点 (1 JSON + 2 HTML)
 
 ### 5.1 查询考试安排
 
@@ -439,6 +523,28 @@ Content-Type: application/x-www-form-urlencoded
 | `khfs` | string | 考核方式 (集中/分散) |
 
 > **SDK**: `client.exams.query("2025", "12")` → `ExamQueryResult`
+
+### 5.2 导出考试安排
+
+```
+POST /jwglxt/kwgl/kscx_dcXsksxxList.html?gnmkdm=N358105
+Content-Type: application/x-www-form-urlencoded
+```
+
+**响应**: 导出文件。
+
+> **SDK**: `client.exams.export()` → HTML string
+
+### 5.3 无排考课程列表
+
+```
+POST /jwglxt/kwgl/kscx_cxWpkskcList.html?doType=query&gnmkdm=N358105
+Content-Type: application/x-www-form-urlencoded
+```
+
+**响应**: HTML 页面。
+
+> **SDK**: `client.exams.unarranged_courses()` → HTML string
 
 ---
 
@@ -1053,7 +1159,30 @@ POST /jwglxt/xtgl/index_cxZjsy.html?localeKey=zh_CN&gnmkdm=index&time={ts}
 
 ## 13. 系统信息
 
-> SDK: `client.system`
+> SDK: `client.system` — 42 个端点 (13 JSON + 14 计数/状态 + 15 HTML/其他)
+
+### 13.0 菜单结构 (JSON)
+
+```
+GET /jwglxt/xtgl/index_cxMenuList.html
+```
+
+**响应** (JSON Array): 完整菜单树。每个节点含 `role` (menu/button)、`name` (名称)、`gnmkdm` (功能代码)、`url` (路径)、`children` (子节点)。
+
+```json
+[
+  {
+    "role": "menu",
+    "name": "报名申请",
+    "children": [
+      {"role": "button", "name": "辅修报名", "gnmkdm": "N1053", "url": "/fxgl/fxbm_cxXsfxbmIndex.html"},
+      {"role": "button", "name": "重修报名", "gnmkdm": "N1056", "url": "/cxbm/cxbm_cxXscxbmIndex.html"}
+    ]
+  }
+]
+```
+
+> **SDK**: `client.system.menu_json()` → dict
 
 ### 13.1 预警与提示
 
@@ -1110,13 +1239,25 @@ POST /jwglxt/xtgl/index_cxZjsy.html?localeKey=zh_CN&gnmkdm=index&time={ts}
 | 13.6.3 | `GET /jwglxt/xtgl/index_cxKczywIndex.html` | GET | 可选业务 | `available_services()` | HTML |
 | 13.6.4 | `GET /jwglxt/xtgl/index_cxGnjsView.html` | GET | 功能检索 | `feature_search()` | HTML |
 | 13.6.5 | `GET /jwglxt/xtgl/index_cxGlwdyyView.html` | GET | 管理我的应用 | `manage_my_apps()` | HTML |
-| 13.6.6 | `GET /jwglxt/xtgl/login_getYzm.html?time={ts}` | GET | 图片验证码 | `captcha()` | bytes (image) |
+| 13.6.6 | `GET /jwglxt/xtgl/login_getYzm.html?time={ts}` | GET | 图片验证码 (旧版) | `captcha()` | bytes (image) |
+| 13.6.7 | `GET /jwglxt/kaptcha` | GET | 图形验证码 (新版) | `kaptcha()` | bytes (image) |
+| 13.6.8 | `GET /jwglxt/xtgl/init_cxBrowser.html` | GET | 浏览器检测 | `browser_check()` | HTML |
+| 13.6.9 | `POST /jwglxt/xtgl/init_changeLocal.html` | POST | 切换语言 | `change_language()` | JSON |
+| 13.6.10 | `GET /jwglxt/xtgl/mmgl_xgMm.html` | GET | 修改密码页面 | `change_password_page()` | HTML |
+| 13.6.11 | `GET /jwglxt/xtgl/index_changeRole.html` | GET | 切换角色页面 | `change_role()` | HTML |
+| 13.6.12 | `POST /jwglxt/xtgl/report_cxReportParams.html` | POST | 获取报表参数 | `report_params()` | HTML |
+| 13.6.13 | `POST /jwglxt/xtgl/index_cxXsxyyjtx.html` | POST | 学业预警提醒 | `academic_warning_tx()` | HTML |
+| 13.6.14 | `POST /jwglxt/xtgl/index_cxKkyjxxUpdate.html` | POST | 旷课预警状态更新 | `absentee_warning_update()` | HTML |
+| 13.6.15 | `POST /jwglxt/xtgl/index_cxBczjsygnmk.html` | POST | 添加最近使用功能 | `add_recent_function()` | HTML |
+| 13.6.16 | `GET /jwglxt/xtgl/file_cxDownFile.html` | GET | 文件下载 | `download_file()` | bytes |
+| 13.6.17 | `GET /jwglxt/xtgl/file_cxViewFile.html` | GET | 文件查看 | `view_file()` | bytes |
+| 13.6.18 | `GET /jwglxt/xtgl/dl_logout.html` | GET | 完全退出登录 | `logout_page()` | HTML |
 
 ---
 
 ## 14. 端点汇总
 
-### 14.1 JSON 数据接口 (37 个)
+### 14.1 JSON 数据接口 (38 个)
 
 | 模块 | 数量 | 端点 |
 |------|------|------|
@@ -1127,22 +1268,23 @@ POST /jwglxt/xtgl/index_cxZjsy.html?localeKey=zh_CN&gnmkdm=index&time={ts}
 | 通知/待办 | 2 | `xwck_cxMoreXwList?doType=query`, `index_cxDbsy?doType=query` |
 | 选课 | 16 | `display`, `search`, `selected`, `class_detail`, `quick_select`, `check_credit`, `credit_validation`, 12 个 filter |
 | 首页 | 2 | `index_cxWdyy`, `index_cxZjsy` |
-| 系统 | 12 | 6 个未提交计数 + 6 个时间/状态 |
+| 系统 | 13 | `menu_json`, 6 个未提交计数, 6 个时间/状态 |
 
-### 14.2 HTML 页面接口 (48 个)
+### 14.2 HTML/其他接口 (62 个)
 
 | 模块 | 数量 |
 |------|------|
 | 认证 | 4 |
-| 成绩 | 2 |
-| 课表 | 4 |
+| 成绩 | 4 |
+| 课表 | 9 |
+| 考试 | 2 |
 | 选课 | 11 |
 | 学业 | 2 |
 | 通知 | 2 |
 | 首页 | 8 |
 | 评价 | 3 |
 | 教材 | 3 |
-| 系统 | 9 |
+| 系统 | 14 |
 
 ### 14.3 gnmkdm 编码对照表
 
@@ -1152,23 +1294,48 @@ POST /jwglxt/xtgl/index_cxZjsy.html?localeKey=zh_CN&gnmkdm=index&time={ts}
 | `N2151` | 学生课表查询 |
 | `N2158` | 课表/学分确认 |
 | `N253501` | 班级课表 |
+| `N253508` | 个人课表查询 (备选) |
 | `N3580` | 考试信息查询 |
+| `N358105` | 考试信息查询 (扩展) |
 | `N253512` | 自主选课 |
+| `N253511` | 学生选课 (推荐) |
 | `N105515` | 学生学业情况 |
 | `N105505` | 学籍预警 |
+| `N305516` | 学业预警处理查询 |
 | `N401605` | 学生评价 |
 | `N401637` | 督导评价 |
 | `N401642` | 领导评价 |
+| `N401650` | 过程评价 |
+| `N403050` | 课程问卷调查 |
 | `N253545` | 教材预订 |
 | `N758066` | 教材费用确认 |
 | `N757010` | 计划教材申请 |
 | `N353088` | 考试监考信息 |
+| `N1598` | 网上上课地址 |
+| `N2155` | 查询空闲教室 |
+| `N255010` | 选课名单查询 |
+| `N1053` | 辅修报名 |
+| `N1056` | 重修报名 |
+| `N2511` | 教学项目报名 |
+| `N307010` | 成绩作废申请 |
+| `N151530` | 校内课程替代申请 |
+| `N104810` | 推免申请 |
+| `N100801` | 查询个人信息 |
+| `N100808` | 学生个人信息维护 |
+| `N1532` | 个人培养方案 |
+| `N153540` | 教学执行计划查看 |
+| `N558020` | 学生成绩总表打印 |
+| `N410510` | 教学信息反馈 |
+| `N408130` | 最佳教师评选 |
+| `N101508` | 学生注册 |
+| `N100830` | 学生自主报到注册 |
+| `N214505` | 班级课表查询 (打印) |
 
 ### 14.4 不可用 (返回 404)
 
 | 接口 | 说明 |
 |------|------|
-| `GET /pyfa/*` (3个) | 培养方案模块不可用 |
+| `GET /pyfa/*` (3个) | 培养方案模块不可用 (路径变更) |
 | `GET /xsxxxggl/xsxxck_cxXsxxIndex.html` | 学籍信息不可用 |
 | `POST /xjyd/xjyd_cxXjydIndex.html` | 学籍异动不可用 |
 | `POST /jkap/ksjkxxcx_cxKsjkxxcxIndex.html` | 考试监考查询不可用 (学生角色) |
@@ -1224,6 +1391,16 @@ user = client.homepage.user_info_html()
 # ---- 系统 ----
 pending = client.system.pending_student_evaluation()
 warnings = client.system.absentee_warning()
+menu = client.system.menu_json()  # 完整菜单树 (JSON)
+
+# ---- 课表 ----
+client.schedule.export_table("2025", "12")     # 导出表格
+client.schedule.simple_view()                   # 简洁版
+client.schedule.credit_confirm_submit()          # 学分确认提交
+
+# ---- 考试 ----
+client.exams.export()           # 导出考试安排
+client.exams.unarranged_courses()  # 无排考课程
 
 # ---- 分页 ----
 q = PageQuery(page=2, page_size=20)
@@ -1234,6 +1411,10 @@ result = client.query(
     "/jwglxt/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=N305005",
     {"xnm": "2025", "xqm": "3"}
 )
+html = client.query_page("/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151")
+
+# ---- 学期推断 ----
+semester = JwxtClient.current_semester()  # → Semester(year="2025", term="12")
 ```
 
 ---
