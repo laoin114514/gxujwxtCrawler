@@ -18,6 +18,7 @@ from .modules import (
     EvaluationModule,
     TextbookModule,
     SystemModule,
+    TeachingPlanModule,
 )
 
 
@@ -59,6 +60,7 @@ class JwxtClient:
         self.evaluation = EvaluationModule(self._base)
         self.textbooks = TextbookModule(self._base)
         self.system = SystemModule(self._base)
+        self.teaching_plan = TeachingPlanModule(self._base)
 
     # ========== 认证 ==========
 

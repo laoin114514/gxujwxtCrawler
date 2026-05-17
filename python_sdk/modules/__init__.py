@@ -8,3 +8,4 @@ from .homepage import HomepageModule
 from .evaluation import EvaluationModule
 from .textbooks import TextbookModule
 from .system import SystemModule
+from .teaching_plan import TeachingPlanModule
