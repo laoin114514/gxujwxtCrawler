@@ -75,3 +75,50 @@ class ScheduleModule:
             f"/jwglxt/kbcx/xskbqr_cxXskbqrIndex.html?gnmkdm=N2158&time={ts}"
         )
         return resp.text
+
+    def export_table(self, xnm: str = "", xqm: str = "") -> str:
+        """课表导出 (表格)"""
+        self._base.ensure_login()
+        q = PageQuery()
+        data = q.to_form_data(xnm=xnm, xqm=xqm)
+        resp = self._base.post(
+            "/jwglxt/kbcx/xskbcx_cxDcExcelXskb.html?doType=table&gnmkdm=N2151",
+            data=data,
+        )
+        return resp.text
+
+    def export_list(self, xnm: str = "", xqm: str = "") -> str:
+        """课表导出 (列表)"""
+        self._base.ensure_login()
+        q = PageQuery()
+        data = q.to_form_data(xnm=xnm, xqm=xqm)
+        resp = self._base.post(
+            "/jwglxt/kbcx/xskbcx_cxDcExcelXskblb.html?doType=list&gnmkdm=N2151",
+            data=data,
+        )
+        return resp.text
+
+    def simple_view(self) -> str:
+        """课表简洁版"""
+        self._base.ensure_login()
+        return self._base.get(
+            "/jwglxt/kbcx/xskbcx_cxXskbSimpleIndex.html?gnmkdm=N2151"
+        ).text
+
+    def credit_confirm_detail(self) -> str:
+        """课表确认详情查询"""
+        self._base.ensure_login()
+        q = PageQuery()
+        resp = self._base.post(
+            "/jwglxt/kbcx/xskbqr_cxXskbqrIndex.html?doType=query&gnmkdm=N2158",
+            data=q.to_form_data(),
+        )
+        return resp.text
+
+    def credit_confirm_submit(self) -> str:
+        """课表确认提交"""
+        self._base.ensure_login()
+        resp = self._base.post(
+            "/jwglxt/kbcx/xskbqr_qrXskbqr.html?gnmkdm=N2158"
+        )
+        return resp.text

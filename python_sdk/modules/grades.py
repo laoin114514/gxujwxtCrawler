@@ -54,3 +54,10 @@ class GradeModule:
             f"{self._ENDPOINT}?doType=statistics&gnmkdm={self._GNMKDM}&time={ts}"
         )
         return resp.text
+
+    def export(self) -> str:
+        """导出成绩"""
+        self._base.ensure_login()
+        return self._base.post(
+            "/jwglxt/cjcx/cjcx_dcListByXs.html?gnmkdm=N305005"
+        ).text

@@ -32,3 +32,19 @@ class ExamModule:
         raw = resp.json()
         items = [ExamItem(**item) for item in raw.get("items", [])]
         return ExamQueryResult(items=items, total=raw.get("totalResult", 0))
+
+    def export(self) -> str:
+        """导出考试安排"""
+        self._base.ensure_login()
+        resp = self._base.post(
+            "/jwglxt/kwgl/kscx_dcXsksxxList.html?gnmkdm=N358105"
+        )
+        return resp.text
+
+    def unarranged_courses(self) -> str:
+        """无排考课程列表"""
+        self._base.ensure_login()
+        resp = self._base.post(
+            "/jwglxt/kwgl/kscx_cxWpkskcList.html?doType=query&gnmkdm=N358105"
+        )
+        return resp.text

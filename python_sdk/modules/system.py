@@ -158,3 +158,69 @@ class SystemModule:
         ts = int(time.time() * 1000)
         resp = self._base.get(f"/jwglxt/xtgl/login_getYzm.html?time={ts}")
         return resp.content
+
+    def kaptcha(self) -> bytes:
+        """获取图形验证码 (新版)"""
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/kaptcha")
+        return resp.content
+
+    def menu_json(self) -> dict:
+        """获取菜单结构 (JSON)
+
+        返回完整的菜单树，含所有模块的 gnmkdm、路径、名称。
+        """
+        self._base.ensure_login()
+        resp = self._base.get("/jwglxt/xtgl/index_cxMenuList.html")
+        return resp.json()
+
+    def browser_check(self) -> str:
+        """浏览器检测"""
+        return self._base.get("/jwglxt/xtgl/init_cxBrowser.html").text
+
+    def change_language(self) -> dict:
+        """切换语言"""
+        self._base.ensure_login()
+        return self._base.post("/jwglxt/xtgl/init_changeLocal.html").json()
+
+    def change_password_page(self) -> str:
+        """修改密码页面"""
+        self._base.ensure_login()
+        return self._base.get("/jwglxt/xtgl/mmgl_xgMm.html").text
+
+    def change_role(self) -> str:
+        """切换角色页面"""
+        self._base.ensure_login()
+        return self._base.get("/jwglxt/xtgl/index_changeRole.html").text
+
+    def report_params(self) -> str:
+        """获取报表参数"""
+        self._base.ensure_login()
+        return self._base.post("/jwglxt/xtgl/report_cxReportParams.html").text
+
+    def academic_warning_tx(self) -> str:
+        """学业预警提醒"""
+        self._base.ensure_login()
+        return self._base.post("/jwglxt/xtgl/index_cxXsxyyjtx.html").text
+
+    def absentee_warning_update(self) -> str:
+        """旷课预警状态更新"""
+        self._base.ensure_login()
+        return self._base.post("/jwglxt/xtgl/index_cxKkyjxxUpdate.html").text
+
+    def add_recent_function(self) -> str:
+        """添加最近使用功能"""
+        self._base.ensure_login()
+        return self._base.post("/jwglxt/xtgl/index_cxBczjsygnmk.html").text
+
+    def download_file(self) -> bytes:
+        """下载文件"""
+        return self._base.get("/jwglxt/xtgl/file_cxDownFile.html").content
+
+    def view_file(self) -> bytes:
+        """查看文件"""
+        return self._base.get("/jwglxt/xtgl/file_cxViewFile.html").content
+
+    def logout_page(self) -> str:
+        """完全退出登录页面"""
+        return self._base.get("/jwglxt/xtgl/dl_logout.html").text
