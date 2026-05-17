@@ -45,8 +45,11 @@ class CourseModule:
             "kspage": kspage, "jspage": jspage,
         }
         resp = self._base.post(f"{self._BASE}_cxZzxkYzbDisplay.html", data=data)
-        raw = resp.json()
-        items = [CourseItem(**item) for item in raw.get("tmpList", [])]
+        try:
+            raw = resp.json()
+            items = [CourseItem(**item) for item in raw.get("tmpList", [])]
+        except Exception:
+            items = []
         return CourseQueryResult(items=items)
 
     def search(self, xkkz_id: str, kklxdm: str,
@@ -109,15 +112,22 @@ class CourseModule:
             "xkzgbj": filters.get("xkzgbj", ""),
         }
         resp = self._base.post(f"{self._BASE}_cxZzxkYzbPartDisplay.html", data=data)
-        raw = resp.json()
-        items = [CourseItem(**item) for item in raw.get("tmpList", [])]
+        try:
+            raw = resp.json()
+            items = [CourseItem(**item) for item in raw.get("tmpList", [])]
+        except Exception:
+            items = []
         return CourseQueryResult(items=items)
 
     def selected(self) -> list[dict]:
         """已选课程列表"""
         self._base.ensure_login()
         resp = self._base.post(f"{self._BASE}_cxZzxkYzbChoosed.html", data={})
-        return resp.json() if isinstance(resp.json(), list) else []
+        try:
+            data = resp.json()
+            return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
+        except Exception:
+            return []
 
     def class_detail(self, kch_id: str, jxb_id: str, xkkz_id: str, kklxdm: str,
                      xkxnm: str, xkxqm: str, **fields) -> CourseClassResult:
@@ -179,8 +189,11 @@ class CourseModule:
         resp = self._base.post(
             f"/jwglxt/xsxk/zzxkyzbjk_cxJxbWithKchZzxkYzb.html", data=data
         )
-        raw = resp.json()
-        items = [CourseClassDetail(**item) for item in raw] if isinstance(raw, list) else []
+        try:
+            raw = resp.json()
+            items = [CourseClassDetail(**item) for item in raw] if isinstance(raw, list) else []
+        except Exception:
+            items = []
         return CourseClassResult(items=items)
 
     # ================================================================
@@ -194,7 +207,10 @@ class CourseModule:
             f"{self._BASE}_xkZzxkyzbQuickly.html",
             data={"xkkz_id": xkkz_id},
         )
-        return resp.json()
+        try:
+            return resp.json()
+        except Exception:
+            return {"flag": "0", "msg": "选课未开放或请求失败"}
 
     def check_credit(self, xnm: str, xqm: str, njdm_id: str,
                      zyh_id: str, kklxdm: str) -> dict:
@@ -298,7 +314,8 @@ class CourseModule:
         resp = self._base.get(
             f"/jwglxt/xkgl/common_queryKkbmPaged.html?localeKey={locale_key}"
         )
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_grades(self, njdm_id: str = "") -> list[dict]:
         """年级列表"""
@@ -306,7 +323,8 @@ class CourseModule:
         resp = self._base.get(
             f"/jwglxt/xkgl/common_queryNjPaged.html?njdm_id={njdm_id}"
         )
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_majors(self, locale_key: str = "zh_CN", jg_id: str = "",
                       zyh_id: str = "") -> list[dict]:
@@ -316,55 +334,64 @@ class CourseModule:
             f"/jwglxt/xkgl/common_queryZyPaged.html"
             f"?localeKey={locale_key}&jg_id={jg_id}&zyh_id={zyh_id}"
         )
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_campus(self) -> list[dict]:
         """校区列表"""
         self._base.ensure_login()
         resp = self._base.get("/jwglxt/xkgl/common_queryXquListPaged.html")
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_course_types(self) -> list[dict]:
         """课程类别列表"""
         self._base.ensure_login()
         resp = self._base.get("/jwglxt/xkgl/common_queryKclbListPaged.html")
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_course_natures(self) -> list[dict]:
         """课程性质列表"""
         self._base.ensure_login()
         resp = self._base.get("/jwglxt/xkgl/common_queryKcxzPaged.html")
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_course_groups(self) -> list[dict]:
         """课程归属列表"""
         self._base.ensure_login()
         resp = self._base.get("/jwglxt/xkgl/common_queryKcgsPaged.html")
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_course_clusters(self) -> list[dict]:
         """课程组列表"""
         self._base.ensure_login()
         resp = self._base.get("/jwglxt/xkgl/common_queryKczPaged.html")
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_teach_modes(self) -> list[dict]:
         """教学模式"""
         self._base.ensure_login()
         resp = self._base.get("/jwglxt/xtgl/comm_cxJcsjList.html?lxdm=0032")
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_weekdays(self) -> list[dict]:
         """上课星期"""
         self._base.ensure_login()
         resp = self._base.get("/jwglxt/xtgl/comm_cxJcsjList.html?lxdm=0036")
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     def filter_periods(self) -> list[dict]:
         """上课节次"""
         self._base.ensure_login()
         resp = self._base.get("/jwglxt/xkgl/common_querySkjcList.html")
-        return resp.json() if isinstance(resp.json(), list) else []
+        data = resp.json()
+        return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
     # ================================================================
     # 页面加载 (HTML)

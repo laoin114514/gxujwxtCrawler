@@ -52,6 +52,22 @@ class SystemModule:
         except Exception:
             return 0
 
+    def _safe_json_post(self, path: str) -> dict:
+        """POST 获取 JSON，失败返回空 dict"""
+        try:
+            self._base.ensure_login()
+            return self._base.post(path).json()
+        except Exception:
+            return {}
+
+    def _safe_json_get(self, path: str) -> dict | list:
+        """GET 获取 JSON，失败返回空 list"""
+        try:
+            self._base.ensure_login()
+            return self._base.get(path).json()
+        except Exception:
+            return []
+
     def pending_textbook_apply(self) -> int:
         """教材申请未提交数量"""
         return self._json_number("/jwglxt/xtgl/index_cxJhkcjcsqWtjNum.html")
@@ -59,7 +75,7 @@ class SystemModule:
     def elective_credit_deficiency(self) -> dict:
         """公选课学分未修满"""
         self._base.ensure_login()
-        return self._base.post("/jwglxt/xtgl/index_cxXsGxkxfwxm.html").json()
+        return self._safe_json_post("/jwglxt/xtgl/index_cxXsGxkxfwxm.html")
 
     def pending_student_evaluation(self) -> int:
         """学生评价未提交数"""
@@ -82,7 +98,7 @@ class SystemModule:
     def minor_fee_reminder(self) -> dict:
         """辅修缴费提醒"""
         self._base.ensure_login()
-        return self._base.post("/jwglxt/xtgl/index_cxFxjftsNum.html").json()
+        return self._safe_json_post("/jwglxt/xtgl/index_cxFxjftsNum.html")
 
     def minor_fee_reminder_update(self) -> str:
         """更新辅修提醒状态"""
@@ -92,22 +108,22 @@ class SystemModule:
     def thesis_topic_time(self) -> dict:
         """毕设选题时间"""
         self._base.ensure_login()
-        return self._base.post("/jwglxt/xtgl/index_cxBsxtsj.html").json()
+        return self._safe_json_post("/jwglxt/xtgl/index_cxBsxtsj.html")
 
     def credit_confirm_time(self) -> dict:
         """学分确认时间"""
         self._base.ensure_login()
-        return self._base.post("/jwglxt/xtgl/index_cxXfqrsj.html").json()
+        return self._safe_json_post("/jwglxt/xtgl/index_cxXfqrsj.html")
 
     def role_enabled(self) -> dict:
         """角色是否启用"""
         self._base.ensure_login()
-        return self._base.post("/jwglxt/xtgl/index_cxJssfqy.html").json()
+        return self._safe_json_post("/jwglxt/xtgl/index_cxJssfqy.html")
 
     def set_default_role(self) -> dict:
         """设置默认角色"""
         self._base.ensure_login()
-        return self._base.post("/jwglxt/xtgl/index_cxSzmrjs.html").json()
+        return self._safe_json_post("/jwglxt/xtgl/index_cxSzmrjs.html")
 
     # ---- 监考 ----
 
@@ -131,7 +147,7 @@ class SystemModule:
     def mark_read(self) -> dict:
         """信息已读状态更新"""
         self._base.ensure_login()
-        return self._base.post("/jwglxt/xtgl/index_cxXxdlztgx.html").json()
+        return self._safe_json_post("/jwglxt/xtgl/index_cxXxdlztgx.html")
 
     def switch_account(self) -> str:
         """用户切换（返回原账号）"""
@@ -171,8 +187,7 @@ class SystemModule:
         返回完整的菜单树，含所有模块的 gnmkdm、路径、名称。
         """
         self._base.ensure_login()
-        resp = self._base.get("/jwglxt/xtgl/index_cxMenuList.html")
-        return resp.json()
+        return self._safe_json_get("/jwglxt/xtgl/index_cxMenuList.html")
 
     def browser_check(self) -> str:
         """浏览器检测"""
