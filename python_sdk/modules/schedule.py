@@ -34,17 +34,6 @@ class ScheduleModule:
         )
         return resp.json()
 
-    def classroom(self, year: str, term: str, room: str = "") -> str:
-        """教室课表"""
-        self._base.ensure_login()
-        q = PageQuery()
-        data = q.to_form_data(xnm=year, xqm=term, jsmc=room)
-        resp = self._base.post(
-            f"/jwglxt/kbcx/jskbcx_cxJskb.html?gnmkdm={self._GNMKDM}",
-            data=data,
-        )
-        return resp.text
-
     def teacher(self, year: str, term: str, name: str = "") -> dict:
         """教师课表"""
         self._base.ensure_login()
@@ -56,14 +45,11 @@ class ScheduleModule:
         )
         return resp.json()
 
-    def class_group(self, year: str, term: str) -> str:
-        """班级课表"""
+    def class_schedule_page(self) -> str:
+        """班级课表查询/打印"""
         self._base.ensure_login()
-        q = PageQuery()
-        data = q.to_form_data(xnm=year, xqm=term)
-        resp = self._base.post(
-            f"/jwglxt/kbcx/xskbcx_cxBjKb.html?gnmkdm=N253501",
-            data=data,
+        resp = self._base.get(
+            "/jwglxt/kbdy/bjkbdy_cxBjkbdyIndex.html?gnmkdm=N214505"
         )
         return resp.text
 
