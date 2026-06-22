@@ -3,7 +3,10 @@
 所有接口从 zzxkYzb.js 逆向提取，含完整参数格式。
 选课操作受时间窗口限制，非选课期仅返回空列表或页面框架。
 """
+import re
 from typing import Optional
+
+from bs4 import BeautifulSoup
 
 from ..base import JwxtBase
 from ..models.common import PageQuery
@@ -18,6 +21,7 @@ class CourseModule:
 
     def __init__(self, base: JwxtBase):
         self._base = base
+        self._context: Optional[dict] = None
 
     # ================================================================
     # 数据查询接口 (JSON)
@@ -46,6 +50,7 @@ class CourseModule:
         }
         resp = self._base.post(f"{self._BASE}_cxZzxkYzbDisplay.html", data=data)
         try:
+            resp.raise_for_status()
             raw = resp.json()
             items = [CourseItem(**item) for item in raw.get("tmpList", [])]
         except Exception:
@@ -113,6 +118,7 @@ class CourseModule:
         }
         resp = self._base.post(f"{self._BASE}_cxZzxkYzbPartDisplay.html", data=data)
         try:
+            resp.raise_for_status()
             raw = resp.json()
             items = [CourseItem(**item) for item in raw.get("tmpList", [])]
         except Exception:
@@ -122,7 +128,11 @@ class CourseModule:
     def selected(self) -> list[dict]:
         """已选课程列表"""
         self._base.ensure_login()
-        resp = self._base.post(f"{self._BASE}_cxZzxkYzbChoosed.html", data={})
+        try:
+            resp = self._base.post(f"{self._BASE}_cxZzxkYzbChoosed.html", data={})
+            resp.raise_for_status()
+        except Exception:
+            return []
         try:
             data = resp.json()
             return data.get("items", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
@@ -190,6 +200,7 @@ class CourseModule:
             f"/jwglxt/xsxk/zzxkyzbjk_cxJxbWithKchZzxkYzb.html", data=data
         )
         try:
+            resp.raise_for_status()
             raw = resp.json()
             items = [CourseClassDetail(**item) for item in raw] if isinstance(raw, list) else []
         except Exception:
@@ -404,3 +415,268 @@ class CourseModule:
             f"{self._BASE}_cxZzxkYzbIndex.html?gnmkdm={self._GNMKDM}&layout=default"
         )
         return resp.text
+
+    # ================================================================
+    # 上下文解析
+    # ================================================================
+
+    def get_context(self, force_refresh: bool = False) -> dict:
+        """解析选课首页，提取 xkkz_id、kklxdm 等必要参数
+
+        返回 dict:
+            in_period:   是否在选课期
+            xkkz_id:     选课控制ID
+            kklxdm_list: 可选课程类型列表 [{code, name, idx}]
+            njdm_id:     年级代码
+            zyh_id:      专业代码
+            xkkz_xh:     选课序号
+            xklc:        选课轮次
+            xkxnm:       选课学年
+            xkxqm:       选课学期
+        """
+        if self._context and not force_refresh:
+            return self._context
+
+        html = self.index_page()
+        soup = BeautifulSoup(html, 'html.parser')
+        ctx = {
+            "in_period": False,
+            "xkkz_id": "",
+            "kklxdm_list": [],
+            "njdm_id": "",
+            "zyh_id": "",
+            "xkkz_xh": "",
+            "xklc": "",
+            "xkxnm": "",
+            "xkxqm": "",
+        }
+
+        # 检查是否在选课期
+        nodata = soup.select_one('.nodata span')
+        if nodata and '不属' in (nodata.get_text(strip=True) or ''):
+            ctx["in_period"] = False
+            self._context = ctx
+            return ctx
+
+        ctx["in_period"] = True
+
+        # 提取 hidden inputs
+        for inp in soup.find_all('input', type='hidden'):
+            name = inp.get('name', '')
+            val = inp.get('value', '')
+            if name in ctx and val:
+                ctx[name] = val
+
+        # 从 script 中提取 kklxdm 选项卡定义
+        # 模式: queryCourse(a_element, kklxdm, xkkz_id, ...)
+        for script in soup.find_all('script'):
+            if not script.string:
+                continue
+            for m in re.finditer(
+                r"queryCourse\s*\(\s*[^,]+,\s*['\"](\d+)['\"]",
+                script.string
+            ):
+                code = m.group(1)
+                if code not in [k['code'] for k in ctx['kklxdm_list']]:
+                    ctx['kklxdm_list'].append({
+                        "code": code,
+                        "name": "",
+                        "idx": len(ctx['kklxdm_list']),
+                    })
+
+        # 提取 kklxdm 的 display name (从 i18n 或 tab title)
+        for script in soup.find_all('script'):
+            if not script.string:
+                continue
+            for m in re.finditer(
+                r"['\"]msg_(\w+)['\"]\s*:\s*['\"]([^'\"]+)['\"]",
+                script.string
+            ):
+                key, name = m.group(1), m.group(2)
+                if key.startswith('kklxdm'):
+                    code = key[6:] if len(key) > 6 else ''
+                    for item in ctx['kklxdm_list']:
+                        if item['code'] == code:
+                            item['name'] = name
+
+        # 默认 kklxdm 为第一个
+        if not ctx['kklxdm_list']:
+            # 从学期数据推测常见值
+            from ..jwxt_client import JwxtClient
+            try:
+                sem = JwxtClient.current_semester()
+            except Exception:
+                sem = None
+            ctx['xkxnm'] = sem.year if sem else ""
+            ctx['xkxqm'] = sem.term if sem else ""
+
+        self._context = ctx
+        return ctx
+
+    # ================================================================
+    # 选课操作
+    # ================================================================
+
+    def select_course(self, jxb_id: str, do_jxb_id: str = "",
+                      kch_id: str = "", jxbzls: str = "",
+                      xkkz_id: str = "", kklxdm: str = "",
+                      **extra) -> dict:
+        """选课 — 提交单个教学班
+
+        Args:
+            jxb_id:    教学班ID
+            do_jxb_id: 目标教学班ID (换班时使用)
+            kch_id:    课程ID
+            jxbzls:    教学班总容量标记
+            xkkz_id:   选课控制ID (不传自动从页面提取)
+            kklxdm:    选课类型代码 (不传自动从页面提取)
+        """
+        self._base.ensure_login()
+        if not xkkz_id or not kklxdm:
+            ctx = self.get_context()
+            xkkz_id = xkkz_id or ctx.get("xkkz_id", "")
+            kklxdm = kklxdm or (ctx["kklxdm_list"][0]["code"] if ctx.get("kklxdm_list") else "")
+
+        data = {
+            "jxb_id": jxb_id,
+            "do_jxb_id": do_jxb_id,
+            "kch_id": kch_id,
+            "jxbzls": jxbzls,
+            "xkkz_id": xkkz_id,
+            "kklxdm": kklxdm,
+            **extra,
+        }
+        resp = self._base.post(f"{self._BASE}_xkBcZzxkYzb.html", data=data)
+        try:
+            return resp.json()
+        except Exception:
+            return {"flag": "0", "msg": resp.text}
+
+    def drop_course(self, jxb_id: str, do_jxb_id: str = "",
+                    kch_id: str = "", xkkz_id: str = "",
+                    kklxdm: str = "", **extra) -> dict:
+        """退课 — 退选单个教学班
+
+        Args:
+            jxb_id:    教学班ID
+            do_jxb_id: 目标教学班ID (换班时使用)
+            kch_id:    课程ID
+            xkkz_id:   选课控制ID (不传自动从页面提取)
+            kklxdm:    选课类型代码 (不传自动从页面提取)
+        """
+        self._base.ensure_login()
+        if not xkkz_id or not kklxdm:
+            ctx = self.get_context()
+            xkkz_id = xkkz_id or ctx.get("xkkz_id", "")
+            kklxdm = kklxdm or (ctx["kklxdm_list"][0]["code"] if ctx.get("kklxdm_list") else "")
+
+        data = {
+            "jxb_id": jxb_id,
+            "do_jxb_id": do_jxb_id,
+            "kch_id": kch_id,
+            "xkkz_id": xkkz_id,
+            "kklxdm": kklxdm,
+            **extra,
+        }
+        resp = self._base.post(f"{self._BASE}_tuikBcZzxkYzb.html", data=data)
+        try:
+            return resp.json()
+        except Exception:
+            return {"flag": "0", "msg": resp.text}
+
+    def add_to_cart(self, jxb_id: str, do_jxb_id: str = "",
+                    kch_id: str = "", jxbzls: str = "",
+                    xkkz_id: str = "", kklxdm: str = "",
+                    **extra) -> dict:
+        """加入购物车 — 暂存选课意向
+
+        Args:
+            jxb_id:    教学班ID
+            do_jxb_id: 目标教学班ID
+            kch_id:    课程ID
+            jxbzls:    教学班总容量标记
+            xkkz_id:   选课控制ID (不传自动从页面提取)
+            kklxdm:    选课类型代码 (不传自动从页面提取)
+        """
+        self._base.ensure_login()
+        if not xkkz_id or not kklxdm:
+            ctx = self.get_context()
+            xkkz_id = xkkz_id or ctx.get("xkkz_id", "")
+            kklxdm = kklxdm or (ctx["kklxdm_list"][0]["code"] if ctx.get("kklxdm_list") else "")
+
+        data = {
+            "jxb_id": jxb_id,
+            "do_jxb_id": do_jxb_id,
+            "kch_id": kch_id,
+            "jxbzls": jxbzls,
+            "xkkz_id": xkkz_id,
+            "kklxdm": kklxdm,
+            **extra,
+        }
+        resp = self._base.post(f"{self._BASE}_xkZzxkYzbGwc.html", data=data)
+        try:
+            return resp.json()
+        except Exception:
+            return {"flag": "0", "msg": resp.text}
+
+    def submit_selection(self, xkkz_id: str = "", kklxdm: str = "",
+                         **extra) -> dict:
+        """提交选课结果
+
+        Args:
+            xkkz_id: 选课控制ID (不传自动从页面提取)
+            kklxdm:  选课类型代码 (不传自动从页面提取)
+        """
+        self._base.ensure_login()
+        if not xkkz_id or not kklxdm:
+            ctx = self.get_context()
+            xkkz_id = xkkz_id or ctx.get("xkkz_id", "")
+            kklxdm = kklxdm or (ctx["kklxdm_list"][0]["code"] if ctx.get("kklxdm_list") else "")
+
+        data = {"xkkz_id": xkkz_id, "kklxdm": kklxdm, **extra}
+        resp = self._base.post(f"{self._BASE}_tjZzxkYzb.html", data=data)
+        try:
+            return resp.json()
+        except Exception:
+            return {"flag": "0", "msg": resp.text}
+
+    def list_all_courses(self, xkkz_id: str = "",
+                         kklxdm: str = "") -> list[dict]:
+        """遍历所有课程类型的可选课程，返回汇总列表"""
+        self._base.ensure_login()
+        ctx = self.get_context()
+        if not ctx["in_period"]:
+            return []
+
+        xkkz_id = xkkz_id or ctx["xkkz_id"]
+        if not ctx["kklxdm_list"]:
+            return []
+
+        # 如果指定了 kklxdm，只查询该类型
+        targets = [k for k in ctx["kklxdm_list"] if not kklxdm or k["code"] == kklxdm]
+        if kklxdm and not targets:
+            targets = [{"code": kklxdm, "name": "", "idx": 0}]
+
+        all_courses = []
+        for kk in targets:
+            result = self.display(
+                xkkz_id=xkkz_id,
+                kklxdm=kk["code"],
+                njdm_id=ctx.get("njdm_id", ""),
+                zyh_id=ctx.get("zyh_id", ""),
+            )
+            for item in result.items:
+                all_courses.append({
+                    "kklxdm": kk["code"],
+                    "kklxdm_name": kk.get("name", ""),
+                    "course_code": item.course_code,
+                    "course_name": item.course_name,
+                    "credit": item.credit,
+                    "class_id": item.class_id,
+                    "class_name": item.class_name,
+                    "capacity": item.capacity,
+                    "selected_count": item.selected_count,
+                    "is_recommended": item.is_recommended,
+                    "kc_row": item.kc_row,
+                })
+        return all_courses

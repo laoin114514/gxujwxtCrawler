@@ -27,7 +27,7 @@ class ExamModule:
         data = q.to_form_data(xnm=year, xqm=term)
         resp = self._base.post(
             f"{self._ENDPOINT}?doType=query&gnmkdm={self._GNMKDM}",
-            data=data,
+            data=data, 
         )
         raw = resp.json()
         items = [ExamItem(**item) for item in raw.get("items", [])]
