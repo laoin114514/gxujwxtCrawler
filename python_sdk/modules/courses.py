@@ -546,7 +546,7 @@ class CourseModule:
             "kklxdm": kklxdm,
             **extra,
         }
-        resp = self._base.post(f"{self._BASE}_xkBcZzxkYzb.html", data=data)
+        resp = self._base.post(f"{self._BASE}_xkBcZyZzxkYzb.html", data=data)
         try:
             return resp.json()
         except Exception:
@@ -579,62 +579,6 @@ class CourseModule:
             **extra,
         }
         resp = self._base.post(f"{self._BASE}_tuikBcZzxkYzb.html", data=data)
-        try:
-            return resp.json()
-        except Exception:
-            return {"flag": "0", "msg": resp.text}
-
-    def add_to_cart(self, jxb_id: str, do_jxb_id: str = "",
-                    kch_id: str = "", jxbzls: str = "",
-                    xkkz_id: str = "", kklxdm: str = "",
-                    **extra) -> dict:
-        """加入购物车 — 暂存选课意向
-
-        Args:
-            jxb_id:    教学班ID
-            do_jxb_id: 目标教学班ID
-            kch_id:    课程ID
-            jxbzls:    教学班总容量标记
-            xkkz_id:   选课控制ID (不传自动从页面提取)
-            kklxdm:    选课类型代码 (不传自动从页面提取)
-        """
-        self._base.ensure_login()
-        if not xkkz_id or not kklxdm:
-            ctx = self.get_context()
-            xkkz_id = xkkz_id or ctx.get("xkkz_id", "")
-            kklxdm = kklxdm or (ctx["kklxdm_list"][0]["code"] if ctx.get("kklxdm_list") else "")
-
-        data = {
-            "jxb_id": jxb_id,
-            "do_jxb_id": do_jxb_id,
-            "kch_id": kch_id,
-            "jxbzls": jxbzls,
-            "xkkz_id": xkkz_id,
-            "kklxdm": kklxdm,
-            **extra,
-        }
-        resp = self._base.post(f"{self._BASE}_xkZzxkYzbGwc.html", data=data)
-        try:
-            return resp.json()
-        except Exception:
-            return {"flag": "0", "msg": resp.text}
-
-    def submit_selection(self, xkkz_id: str = "", kklxdm: str = "",
-                         **extra) -> dict:
-        """提交选课结果
-
-        Args:
-            xkkz_id: 选课控制ID (不传自动从页面提取)
-            kklxdm:  选课类型代码 (不传自动从页面提取)
-        """
-        self._base.ensure_login()
-        if not xkkz_id or not kklxdm:
-            ctx = self.get_context()
-            xkkz_id = xkkz_id or ctx.get("xkkz_id", "")
-            kklxdm = kklxdm or (ctx["kklxdm_list"][0]["code"] if ctx.get("kklxdm_list") else "")
-
-        data = {"xkkz_id": xkkz_id, "kklxdm": kklxdm, **extra}
-        resp = self._base.post(f"{self._BASE}_tjZzxkYzb.html", data=data)
         try:
             return resp.json()
         except Exception:
